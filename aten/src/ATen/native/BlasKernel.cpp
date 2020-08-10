@@ -6,6 +6,8 @@
 
 #if AT_BUILD_WITH_BLAS()
 extern "C" double ddot_(int *n, double *x, int *incx, double *y, int *incy);
+extern "C" void zdotu_(std::complex<double> *res, int *n, std::complex<double> *x, int *incx, std::complex<double> *y, int *incy);
+extern "C" void cdotu_(std::complex<float> *res, int *n, std::complex<float> *x, int *incx, std::complex<float> *y, int *incy);
 extern "C" void dscal_(int *n, double *a, double *x, int *incx);
 extern "C" void sscal_(int *n, float *a, float *x, int *incx);
 extern "C" void dgemv_(char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
@@ -196,6 +198,18 @@ float dot_fast_path(int n, float* x, int incx, float* y, int incy) {
 double dot_fast_path(int n, double* x, int incx, double* y, int incy) {
   return ddot_(&n, x, &incx, y, &incy);
 }
+
+c10::complex<double> dot_fast_path(int n, c10::complex<double>* x, int incx, c10::complex<double>* y, int incy) {
+  c10::complex<double> result;
+  zdotu_(reinterpret_cast<std::complex<double>* >(&result), &n, reinterpret_cast<std::complex<double>*>(x), &incx, reinterpret_cast<std::complex<double>*>(y), &incy);
+  return result;
+}
+
+c10::complex<float> dot_fast_path(int n, c10::complex<float>* x, int incx, c10::complex<float>* y, int incy) {
+  c10::complex<float> result;
+  cdotu_(reinterpret_cast<std::complex<float>* >(&result), &n, reinterpret_cast<std::complex<float>*>(x), &incx, reinterpret_cast<std::complex<float>*>(y), &incy);
+  return result;
+}
 #endif
 
 template <typename scalar_t>
@@ -249,6 +263,16 @@ float dot_impl(int64_t n, float* x, int64_t incx, float* y, int64_t incy) {
 
 template <>
 double dot_impl(int64_t n, double* x, int64_t incx, double* y, int64_t incy) {
+  return dot_impl_floating(n, x, incx, y, incy);
+}
+
+template <>
+c10::complex<double> dot_impl(int64_t n, c10::complex<double>* x, int64_t incx, c10::complex<double>* y, int64_t incy) {
+  return dot_impl_floating(n, x, incx, y, incy);
+}
+
+template <>
+c10::complex<float> dot_impl(int64_t n, c10::complex<float>* x, int64_t incx, c10::complex<float>* y, int64_t incy) {
   return dot_impl_floating(n, x, incx, y, incy);
 }
 
