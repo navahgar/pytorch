@@ -26,7 +26,7 @@ C10_DEFINE_bool(
 namespace torch {
 namespace jit {
 
-static bool texpr_reductions_enabled = false;
+static bool texpr_reductions_enabled = true;
 
 bool isSupportedForBlock(Node* node) {
   switch (node->kind()) {
