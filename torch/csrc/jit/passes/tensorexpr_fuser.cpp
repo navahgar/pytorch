@@ -7,6 +7,7 @@
 #include <torch/csrc/jit/jit_log.h>
 #include <torch/csrc/jit/jit_opt_limit.h>
 #include <torch/csrc/jit/passes/common_subexpression_elimination.h>
+#include <torch/csrc/jit/passes/concat_opt.h>
 #include <torch/csrc/jit/passes/constant_pooling.h>
 #include <torch/csrc/jit/passes/dead_code_elimination.h>
 #include <torch/csrc/jit/passes/pass_manager.h>
@@ -1144,6 +1145,8 @@ void FuseTensorExprs(
   EliminateDeadCode(graph);
 
   GRAPH_DUMP("After TExprFuser: ", graph);
+
+  OptimizeConcat(graph);
 }
 
 Operation createTensorExprOp(const Node* node) {
